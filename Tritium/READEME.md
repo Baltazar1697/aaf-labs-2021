@@ -12,6 +12,6 @@
 
 --------------------------
 ## Progress & Deadlines
-* Parser realization (11.10)
-* Commands `CREATE`, `SELECT`, `WHERE` ( simple CORE ), unit-testing  (15.11.2021)
-* Command `WHERE' with full functionality ( advanced CORE ), 80%+ coverage with tests (12.12.2021)
+* Parser realization (07.10)
+* Commands `CREATE`, `SELECT`, `WHERE` ( simple CORE ), unit-testing  (04.11.2021)
+* Command `WHERE' with full functionality ( advanced CORE ), 80%+ coverage with tests (02.12.2021)
