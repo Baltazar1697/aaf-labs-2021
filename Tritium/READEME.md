@@ -8,7 +8,7 @@
 
 --------------------------
 ## Architecture
-![architecture diagram](./architecture.png)
+![architecture diagram](./Architecture.png)
 
 --------------------------
 ## Progress & Deadlines
