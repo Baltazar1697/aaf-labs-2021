@@ -10,7 +10,7 @@ class Parser:
         
     def action(self, query:str) -> str:         #TODO: optimize this shit
         query = self.parse_command(query)       #split input command to the list with needed arguments
-        command = query[0] if query != -1 else 'error'
+        command = query[0]
 
         if command == 'CREATE':
             _, table_name, columns = query
@@ -66,7 +66,7 @@ class Parser:
 
         except:
             print('The list is too short')
-            return [-1]
+            return [0]
 
 if __name__ == '__main__':
     client = Parser()
