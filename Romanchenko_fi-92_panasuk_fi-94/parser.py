@@ -3,20 +3,19 @@ import db, re
 
 
 class Parser:
-    def __init__(self):
+    def __init__(self):                         #initial action for start of the application
         while True:
             query = input('--> ')
-            for command in query.split(';'):
-                if command:
+            for command in query.split(';'):    #split commands with ';' : CREATE ...; SELECT ... 
+                if command:                     # => in dif. commands
                     print (self.action(query))
         
-    def action(self, query:str) -> str:
-        command = query.split()[0].upper()
-        query = self.parse_command(query)
+    def action(self, query:str) -> str:         #TODO: optimize this shit
+        query = self.parse_command(query)       #split input command to the list with needed arguments
+        command = query[0]
+        print (query)
         if command == 'CREATE':
-            print (query)
             _, table_name, columns = query
-            
             action_call = db.create(table_name, columns)
         elif command == 'SELECT':
             _, table_name = query
@@ -35,14 +34,13 @@ class Parser:
     def error(self):
         return 'ERROR, COMMAND NOT FOUND'
 
-    def parse_command(self, query) -> list:
+    def parse_command(self, query) -> list:     #splits input for list of [command, column, values, *arg]
         str = re.findall(r'\S+', query)
-        columns = {}
-        print (str)
         for i in str:
             if i.upper() == 'CREATE' and str.index(i)+1 < len(str):
-                table_name = str[str.index(i)+1]
-                m = query.split('(', 1)[1].split(')')[0].replace(',', '').split()
+                columns = {}
+                table_name = str[str.index(i)+1] # if str[0] == CREATE => str[1] = table_name
+                m = query.split('(', 1)[1].split(')')[0].replace(',', '').split()   #parse arguments
                 for column in m:
                     if column == 'INDEXED':
                         pass
