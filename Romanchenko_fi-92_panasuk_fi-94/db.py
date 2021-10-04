@@ -1,5 +1,6 @@
 class DB:
-    storage = []
+    def __init__(self) -> None:
+        self.tables = {}
 
     def create(self, table_name, columns):
         print ('Table', table_name, 'has been created')
