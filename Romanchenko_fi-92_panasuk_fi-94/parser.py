@@ -1,10 +1,11 @@
 import storage, re
 
 class Parser:
+
     def __init__(self):       
         query = ''                  #initial action for start of the application
         while not query.endswith(';'):
-            query = query + input('--> ')
+            query = query + ' ' + input('--> ')
         for command in query.split(';'):    #split commands with ';' : CREATE ...; SELECT ... 
             if command:                     # => in dif. commands
                 self.action(command)
@@ -33,6 +34,7 @@ class Parser:
             action_call = self.error()
 
         return action_call
+
     def exit(self):
         return quit()
 
@@ -93,11 +95,8 @@ class Parser:
             # print("List don't consist brackets")
             values = query.replace(',', '').split()[2:]
         return values if specials not in values else [0]
-        
         #//
         
-
-
 
 if __name__ == '__main__':
     client = Parser()
