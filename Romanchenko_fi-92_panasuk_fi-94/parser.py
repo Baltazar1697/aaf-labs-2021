@@ -3,11 +3,11 @@ import storage, re
 class Parser:
 
     def __init__(self):       
-        query = ''                  #initial action for start of the application
+        query = ''                              #initial action for start of the application
         while not query.endswith(';'):
             query = query + ' ' + input('--> ')
-        for command in query.split(';'):    #split commands with ';' : CREATE ...; SELECT ... 
-            if command:                     # => in dif. commands
+        for command in query.split(';'):        #split commands with ';' : CREATE ...; SELECT ... 
+            if command:                         # => in dif. commands
                 self.action(command)
         
     def action(self, query:str) -> str:         #TODO: optimize this shit
@@ -41,12 +41,15 @@ class Parser:
     def error(self):
         return 'ERROR, COMMAND NOT FOUND'
 
-    def parse_command(self, query) -> list:     #splits input for list of [command, column, values, *arg]
+    def parse_command(self, query) -> list:         #splits input for list of [command, column, values, *arg]
+        regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*")
+        query = re.sub(r"(?i)indexed",'INDEXED',regex.sub(" ",query))
         str = re.findall(r'\S+', query)
+        
         command = str[0]
 
         columns = {}
-        table_name = str[str.index(command)+1] # if str[0] == CREATE => str[1] = table_name
+        table_name = str[str.index(command)+1]      # if str[0] == CREATE => str[1] = table_name
         
         values = self.splitter(query)
 
@@ -70,13 +73,14 @@ class Parser:
 
         elif command.upper() == 'SELECT':
             selected = str[1]
+            str = re.sub(r"(?i)from",'FROM',query)
+
             table_name = str[str.index('FROM')+1]       #TODO: regular expresion for 'FROM'
                 
             return ['SELECT', table_name, selected]
 
         elif command.upper() == 'INSERT':
             table_name = str[1]
-            values = query.split('(', 1)[1].split(')')[0].replace(',', '').split()
 
             return ['INSERT',table_name, values]
 
@@ -86,14 +90,14 @@ class Parser:
             return ['DELETE', table_name]
 
     def splitter(self, query):
-        #// CATCH input without brackets
+        #// CATCH input despite brackets
         specials = ['CREATE','SELECT','DELETE','INSERT']
         values = []
         try:
-            values = query.split('(', 1)[1].split(')')[0].replace(',', '').split()
+            values = query.split('(', 1)[1].split(')')[0].replace(',', ' ').split()
         except IndexError:
             # print("List don't consist brackets")
-            values = query.replace(',', '').split()[2:]
+            values = query.replace(',', ' ').split()[2:]
         return values if specials not in values else [0]
         #//
         
