@@ -35,14 +35,14 @@ class Parser:
 
         return action_call
 
-    def exit(self):
+    def exit(self) -> None:                         #qutting the application
         return quit()
 
-    def error(self):
+    def error(self) -> None:                        #displaying error message
         return 'ERROR, COMMAND NOT FOUND'
 
     def parse_command(self, query) -> list:         #splits input for list of [command, column, values, *arg]
-        regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*")
+        regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*") #regex for removing termination symbols
         query = re.sub(r"(?i)indexed",'INDEXED',regex.sub(" ",query))
         str = re.findall(r'\S+', query)
         
@@ -51,10 +51,8 @@ class Parser:
         columns = {}
         table_name = str[str.index(command)+1]      # if str[0] == CREATE => str[1] = table_name
         
-        values = self.splitter(query)
-
-
         if command.upper() == 'CREATE':
+            values = self.splitter(query)               #splitting query into arguments list
             try:
                 if len(str) < 3: raise Exception('too short')
             except:
@@ -64,7 +62,7 @@ class Parser:
             for column in values:
                 if column == 'INDEXED':
                     pass
-                elif column == values[-1] or values[values.index(column)+1] != 'INDEXED':   #TODO: regular expression for 'INDEXED'
+                elif column == values[-1] or values[values.index(column)+1] != 'INDEXED':   
                     columns[column] = False
                 elif values[values.index(column)+1] == 'INDEXED':
                     columns[column] = True
@@ -73,28 +71,32 @@ class Parser:
 
         elif command.upper() == 'SELECT':
             selected = str[1]
-            str = re.sub(r"(?i)from",'FROM',query)
+            str = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
 
-            table_name = str[str.index('FROM')+1]       #TODO: regular expresion for 'FROM'
+            table_name = str[str.index('FROM')+1]       
                 
             return ['SELECT', table_name, selected]
 
         elif command.upper() == 'INSERT':
+            values = self.splitter(query)
             table_name = str[1]
 
             return ['INSERT',table_name, values]
 
         elif command.upper() == 'DELETE':
-            table_name = str[str.index('FROM')+1]
-
+            str = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
+            try:
+                table_name = str[str.index('FROM')+1]
+            except ValueError:
+                table_name = str[1]
             return ['DELETE', table_name]
 
-    def splitter(self, query):
+    def splitter(self, query) -> list:
         #// CATCH input despite brackets
         specials = ['CREATE','SELECT','DELETE','INSERT']
         values = []
         try:
-            values = query.split('(', 1)[1].split(')')[0].replace(',', ' ').split()
+            values = query.split('(', 1)[1].split(')')[0].replace(',', ' ').replace("'",'').split()
         except IndexError:
             # print("List don't consist brackets")
             values = query.replace(',', ' ').split()[2:]
