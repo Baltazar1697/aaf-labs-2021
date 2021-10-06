@@ -1,16 +1,20 @@
 import storage, re
 
 class Parser:
-    def __init__(self):                         #initial action for start of the application
-        while True:
-            query = input('--> ')
-            for command in query.split(';'):    #split commands with ';' : CREATE ...; SELECT ... 
-                if command:                     # => in dif. commands
-                    self.action(command)
+    def __init__(self):       
+        query = ''                  #initial action for start of the application
+        while not query.endswith(';'):
+            query = query + input('--> ')
+        for command in query.split(';'):    #split commands with ';' : CREATE ...; SELECT ... 
+            if command:                     # => in dif. commands
+                self.action(command)
         
     def action(self, query:str) -> str:         #TODO: optimize this shit
+        if query.split()[0].upper() == 'EXIT':
+            action_call = self.exit()
         query = self.parse_command(query)       #split input command to the list with needed arguments
         command = query[0]
+        
 
         if command == 'CREATE':
             _, table_name, columns = query
@@ -24,10 +28,13 @@ class Parser:
         elif command == 'DELETE':
             _, table_name = query
             action_call = storage.delete(table_name)
+        
         else:
             action_call = self.error()
 
         return action_call
+    def exit(self):
+        return quit()
 
     def error(self):
         return 'ERROR, COMMAND NOT FOUND'
