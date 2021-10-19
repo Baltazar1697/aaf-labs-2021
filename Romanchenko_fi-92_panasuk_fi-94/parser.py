@@ -2,13 +2,31 @@ import storage, re
 
 class Parser:
 
+    NAMES = r"[a-zA-Z][a-zA-Z0-9_]*"
+    COMMANDS = {"CREATE", "INSERT", "SELECT", "DELETE"}
+    SPECIAL_WORDS = {"INDEXED", "INTO", "FROM", "WHERE", "ORDER_BY"}
+    OPERATORS = {"=", "!=", ">", "<", ">=", "<="}
+    OPERATORS_LIST = list(OPERATORS)
+
+
     def __init__(self):       
         query = ''                              #initial action for start of the application
-        while not query.endswith(';'):
-            query = query + ' ' + input('--> ')
-        for command in query.split(';'):        #split commands with ';' : CREATE ...; SELECT ... 
-            if command:                         # => in dif. commands
-                self.action(command)
+        while True:
+            query += " " + input("-->").strip()
+            if ";" in query:
+                for command in query.split(";"): # Split commands with ';' : CREATE ...; SELECT ...
+                    if command:
+                        command = command.strip()
+                        if command.upper() == "EXIT": # Exit command to stop the program
+                            raise Parser.StopTheLoop
+                        try:
+                            response = self.action(command) # Try to parse and complete the commands
+                        except IndexError:
+                            response = "ERROR: invalid command! Try again."
+                        except Exception as e:
+                            response = "ERROR: {}".format(str(e))
+                        print(response)
+                        query = ""
         
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
