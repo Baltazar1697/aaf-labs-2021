@@ -15,3 +15,7 @@
 * Parser realization (07.10)
 * Commands `CREATE`, `SELECT`, `WHERE` ( simple CORE ), unit-testing  (04.11.2021)
 * Command `WHERE' with full functionality ( advanced CORE ), 80%+ coverage with tests (02.12.2021)
+
+-------------------------
+## DOCUMENTATION
+* CREATE table_name (column_name_1 [INDEXED], column_name_2 [...] )
