@@ -1,19 +1,27 @@
-def create(table_name, columns):
-    DB = database(table_name, columns)
-    print ('Table', table_name, 'has been created with columns ', columns)
-    return DB
+# DB structure
 
-def select(table_name, columns):
-    print ('SELECTED',columns, ' FROM ', table_name)
-    
-def insert(table_name, values):
-    print ('Inserted row with ', values, ' in ', table_name)
+class db:
+    @staticmethod
+    def check_columns(self, table_name: str, columns: list) -> bool: # Check if columns are in table
+        for column in columns:
+            if column not in self.tables[table_name].columns:
+                return False
+        return True
 
-def delete(table_name):
-    print ('Deleted ', table_name)
-        
-class database:
-    def __init__(self, table_name, columns) -> None:
-        self.table_name = table_name
-        self.tables = columns
+    def create(self, table_name: str, columns: list) -> str: # Create table
+        if columns:
+            # Add dunction of creating table
+            return f"Table '{table_name}' has been created!"
+        return "invalid columns!"
 
+    def insert(self, table_name: str, values: list) -> str: # Insert into table
+        return f"{len(values)} row(s) has been inserted into {table_name}!"
+
+    def select(self, table_name: str, columns: list, condition: list, group_columns: list) -> str:
+        return f"{len(columns)} row(s) has been selected from {table_name}!"
+
+    def delete(self, table_name: str, condition: list) -> str:
+        return f"{len(table_name)} row(s) has been deleted from {table_name}!"
+
+if __name__ == "__main__":
+    db = db()
