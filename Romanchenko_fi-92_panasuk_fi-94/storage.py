@@ -21,7 +21,7 @@ class db:
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
     def delete(self, table_name: str, condition: list) -> str:
-        return f"{table_name} row(s) has been deleted from {table_name}!"
+        return f"From {table_name} row(s) has been deleted from {table_name}!"
 
 if __name__ == "__main__":
     db = db()
