@@ -1,10 +1,10 @@
-import storage, re
-
+import storage as db, re
+storage = db.db()
 class Parser:
 
     NAMES = r"[a-zA-Z][a-zA-Z0-9_]*"
     COMMANDS = {"CREATE", "INSERT", "SELECT", "DELETE"}
-    SPECIAL_WORDS = {"INDEXED", "INTO", "FROM", "WHERE", "ORDER_BY"}
+    SPECIAL_WORDS = {"INDEXED", "INTO", "FROM", "WHERE",}
     OPERATORS = {"=", "!=", ">", "<", ">=", "<="}
     OPERATORS_LIST = list(OPERATORS)
 
@@ -39,15 +39,14 @@ class Parser:
             _, table_name, columns = query
             action_call = storage.create(table_name, columns)
         elif command == 'SELECT':
-            _, table_name, columns = query
-            action_call = storage.select(table_name, columns)
+            _, table_name, columns, condition = query
+            action_call = storage.select(table_name, columns, condition)
         elif command == 'INSERT':
             _, table_name, values = query
             action_call = storage.insert(table_name, values)
         elif command == 'DELETE':
-            _, table_name = query
-            action_call = storage.delete(table_name)
-        
+            _, table_name, condition = query
+            action_call = storage.delete(table_name, condition)
         else:
             action_call = self.error()
 
@@ -60,67 +59,156 @@ class Parser:
         return 'ERROR, COMMAND NOT FOUND'
 
     def parse_command(self, query) -> list:         #splits input for list of [command, column, values, *arg]
-        regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*") #regex for removing termination symbols
-        query = re.sub(r"(?i)indexed",'INDEXED',regex.sub(" ",query))
-        str = re.findall(r'\S+', query)
-        
-        command = str[0]
+        query = query.split()
+        query = list(filter(lambda x: x != "", sum([elements.split(",") for elements in query], [])))
+        command = query[0]
+        for i, element in enumerate(query):
+            if element not in Parser.OPERATORS_LIST:
+                check = [operator in element for operator in Parser.OPERATORS_LIST]
+                if any(check):
+                    operator = Parser.OPERATORS_LIST[check.index(True)]
+                    insert_element = element.split(operator)
+                    insert_element.insert(1, operator)
+                    query = query[:i] + insert_element + query[i + 1]
+                    break
+        str = []
+        i = 0
 
-        columns = {}
-        table_name = str[str.index(command)+1]      # if str[0] == CREATE => str[1] = table_name
+        while i < len(query) and query[i].upper() not in Parser.COMMANDS: 
+            i += 1
+        if i >= len(query):
+            raise Exception("command not found!")
+
+        command_type = query[i].upper()
+        str.append(command_type)
+        i += 1
         
+        columns =[]
+
         if command.upper() == 'CREATE':
-            values = self.splitter(query)               #splitting query into arguments list
-            try:
-                if len(str) < 3: raise Exception('too short')
-            except:
-                print('The list is too short')
-                return [0]
+            if re.match(Parser.NAMES, query[i]) and not query[i].upper() in Parser.SPECIAL_WORDS:
+                str.append(query[i])
+                i += 1
+            else:
+                raise Exception("invalid table name!")
 
-            for column in values:
-                if column == 'INDEXED':
-                    pass
-                elif column == values[-1] or values[values.index(column)+1] != 'INDEXED':   
-                    columns[column] = False
-                elif values[values.index(column)+1] == 'INDEXED':
-                    columns[column] = True
+            columns = []
 
-            return ['CREATE', table_name, columns]
+            while i < len(query):
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+                if re.match(Parser.NAMES, query[i]):
+                    if query[i].upper() in Parser.SPECIAL_WORDS:
+                        raise Exception("special word before column name!")
+                    if (i + 1) < len(query):
+                        next_element = query[i + 1]
+                        for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                            if symbols in next_element:
+                                next_element = next_element.replace(symbols, "")
+                        isIndexed = next_element.upper() == "INDEXED"
+                    else:
+                        isIndexed = False
+                    columns.append([query[i], isIndexed])
+                    i += isIndexed
+                i += 1
+
+            str.append(columns)
+
 
         elif command.upper() == 'SELECT':
-            selected = str[1]
-            str = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
+            columns = []
 
-            table_name = str[str.index('FROM')+1]       
-                
-            return ['SELECT', table_name, selected]
+            while i < len(query) and query[i].upper() != "FROM":
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+                if query[i] == "*":
+                    columns = []
+                    i += 1
+                elif re.match(Parser.NAMES, query[i]) and query[i].upper() not in Parser.SPECIAL_WORDS:
+                    columns.append(query[i])
+                    i += 1
+                else:
+                    raise Exception("invalid column name!")
+
+            if i < len(query) and query[i].upper() == "FROM":
+                i += 1
+            if i < len(query) and re.match(Parser.NAMES, query[i]) and not query[i].upper() in Parser.SPECIAL_WORDS:
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+
+                str.append(query[i])
+                str.append(columns)
+                i += 1  
+            else:
+                raise Exception("invalid table name!")
+
+            condition = []
+
+            if i < len(query) and query[i].upper() == "WHERE":
+                i += 1
+                while i < len(query) and len(condition < 3):
+                    for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                        if symbols in query[i]:
+                            query[i] = query[i].replace(symbols, "")
+                    condition.append(str(query[i]))
+                    i += 1
+            str.append(condition)
+
 
         elif command.upper() == 'INSERT':
-            values = self.splitter(query)
-            table_name = str[1]
+            if i < len(query) and query[i].upper() in Parser.SPECIAL_WORDS:
+                i += 1
+            if i < len(query) and re.match(Parser.NAMES, query[i]) and not query[i].upper() in Parser.SPECIAL_WORDS:
+                str.append(query[i])
+                i += 1
+            else:
+                raise Exception("invalid table name!")
 
-            return ['INSERT',table_name, values]
+            values = []
+
+            while i < len(query):
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+                values.append(query[i])
+                i += 1
+                
+
+            str.append(values)
+
 
         elif command.upper() == 'DELETE':
-            str = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
-            try:
-                table_name = str[str.index('FROM')+1]
-            except ValueError:
-                table_name = str[1]
-            return ['DELETE', table_name]
+            if i < len(query) and query[i].upper() in Parser.SPECIAL_WORDS:
+                i += 1
+            if i < len(query) and re.match(Parser.NAMES, query[i]) and not query[i].upper() in Parser.SPECIAL_WORDS:
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+                str.append(query[i])
+                i += 1
+            else:
+                raise Exception("invalid table name")
+            if i < len(query) and query[i].upper() in Parser.SPECIAL_WORDS:
+                i += 1
 
-    def splitter(self, query) -> list:
-        #// CATCH input despite brackets
-        specials = ['CREATE','SELECT','DELETE','INSERT']
-        values = []
-        try:
-            values = query.split('(', 1)[1].split(')')[0].replace(',', ' ').replace("'",'').split()
-        except IndexError:
-            # print("List don't consist brackets")
-            values = query.replace(',', ' ').split()[2:]
-        return values if specials not in values else [0]
-        #//
-        
+            condition = []
+
+            while i < len(query):
+                for symbols in ["(", ")", ",", ";", "\t", "\n", "\r"]:
+                    if symbols in query[i]:
+                        query[i] = query[i].replace(symbols, "")
+                condition.append(str(query[i]))
+                if query[i].upper() in Parser.SPECIAL_WORDS:
+                    raise Exception("invalid column name in WHERE!")
+                condition.append(query[i])
+                i += 1
+            str.append(condition)
+
+        return str
+
 
 if __name__ == '__main__':
     client = Parser()
