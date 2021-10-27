@@ -17,11 +17,11 @@ class db:
     def insert(self, table_name: str, values: list) -> str: # Insert into table
         return f"{len(values)} row(s) has been inserted into {table_name}!"
 
-    def select(self, table_name: str, columns: list, condition: list, group_columns: list) -> str:
-        return f"{len(columns)} row(s) has been selected from {table_name}!"
+    def select(self, table_name: str, columns: list, condition: list,) -> str:
+        return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
     def delete(self, table_name: str, condition: list) -> str:
-        return f"{len(table_name)} row(s) has been deleted from {table_name}!"
+        return f"{table_name} row(s) has been deleted from {table_name}!"
 
 if __name__ == "__main__":
     db = db()
