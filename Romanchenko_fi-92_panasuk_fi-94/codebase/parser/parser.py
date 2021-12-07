@@ -60,19 +60,22 @@ class Parser:
         regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*") #regex for removing termination symbols
         query = re.sub(r"[\(,\)]", " ",re.sub(r"(?i)indexed",'INDEXED',regex.sub(" ",query)))
         expression = re.findall(r'\S+', query)
+        indexation = 0
         columns = {}
         if re.match(r"(?i)create", query):
             table_name = expression[1]
-            for column in expression:
+            for column in expression[2:]:
                 if column == 'INDEXED':
                     pass
                 elif column == expression[-1] or expression[expression.index(column)+1] != 'INDEXED':   
                     columns[column] = False
                 elif expression[expression.index(column)+1] == 'INDEXED':
                     columns[column] = True
-
+                    indexation +=1
+            if indexation in [0,1]:
                 return ['CREATE',table_name, columns]
-
+            else:
+                return self.error()
 
         elif re.match(r"(?i)select", query):
             selected = expression[1]

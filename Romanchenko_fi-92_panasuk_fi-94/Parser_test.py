@@ -1,7 +1,6 @@
 import unittest
-from parser import parse_command
-
-
+from codebase.parser.parser import Parser
+from storage import *
 class MyTestCase(unittest.TestCase):
     def test_something(self):
         self.assertEqual(True, False)  # add assertion here

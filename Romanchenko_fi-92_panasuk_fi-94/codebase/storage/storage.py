@@ -10,18 +10,31 @@ class db:
 
     def create(self, table_name: str, columns: list) -> str: # Create table
         if columns:
-            # Add dunction of creating table
+            scheme = {}
+            for i in columns:
+                scheme[i] = columns[i]
+            # print("Here is columns")
+            # for i in scheme:
+            #     print(i)
+            table(table_name, scheme)
             return f"Table '{table_name}' has been created!"
         return "invalid columns!"
 
     def insert(self, table_name: str, values: list) -> str: # Insert into table
+        if not self.check_columns(self, table_name, values):
+          1  
         return f"{len(values)} row(s) has been inserted into {table_name}!"
 
-    def select(self, table_name: str, columns: list, condition: list,) -> str:
+    def select(self, table_name: str, columns: list, condition: list,) -> str: # Return columns selected
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
-    def delete(self, table_name: str, condition: list) -> str:
+    def delete(self, table_name: str, condition: list) -> str: # Delete data from table
         return f"From {table_name} row(s) has been deleted from {table_name}!"
 
 if __name__ == "__main__":
     db = db()
+
+class table:
+    def __init__(self, table_name, scheme):
+        table_name = table_name
+        print (scheme.values())
