@@ -7,7 +7,6 @@ class Parser:
     SPECIAL_WORDS = ["INDEXED", "INTO", "FROM", "WHERE"]
     OPERATORS = ["=", "!=", ">", "<", ">=", "<="]
 
-
     def __init__(self):       
         query = ''                              #initial action for start of the application
         while True:
