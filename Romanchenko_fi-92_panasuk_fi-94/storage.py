@@ -2,9 +2,9 @@
 
 class db:
     @staticmethod
-    def check_columns(self, table_name: str, columns: list) -> bool: # Check if columns are in table
+    def check_columns(self, columns: list) -> bool: # Check if columns are in table
         for column in columns:
-            if column not in self.tables[table_name].columns:
+            if column not in self._table._scheme.keys():
                 return False
         return True
 
@@ -13,17 +13,15 @@ class db:
             scheme = {}
             for i in columns:
                 scheme[i] = columns[i]
-            # print("Here is columns")
-            # for i in scheme:
-            #     print(i)
-            table(table_name, scheme)
+            self._table = table(table_name, scheme)
             return f"Table '{table_name}' has been created!"
         return "invalid columns!"
 
     def insert(self, table_name: str, values: list) -> str: # Insert into table
-        if not self.check_columns(self, table_name, values):
-          1  
-        return f"{len(values)} row(s) has been inserted into {table_name}!"
+        if self.check_columns(self, values):
+            for i in values:
+               1
+        return f"{values} has been inserted!"
 
     def select(self, table_name: str, columns: list, condition: list,) -> str: # Return columns selected
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
@@ -36,5 +34,13 @@ if __name__ == "__main__":
 
 class table:
     def __init__(self, table_name, scheme):
-        table_name = table_name
-        print (scheme.values())
+        self._table_name = table_name
+        self._indexator = list(scheme.keys())[list(scheme.values()).index(True)]
+        self._scheme = scheme
+        self._data = {}
+        print(self._indexator)
+        print(self._scheme.keys())
+
+        def __getitem__(self, item):
+            return self._data[item]
+

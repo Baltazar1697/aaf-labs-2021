@@ -2,7 +2,7 @@ import storage as db, re
 storage = db.db()
 class Parser:
 
-    NAMES = r"[a-zA-Z][a-zA-Z0-9_]*"
+    NAMES = r"[a-zA-Z]+|\d+" 
     COMMANDS = ["CREATE", "INSERT", "SELECT", "DELETE"]
     SPECIAL_WORDS = ["INDEXED", "INTO", "FROM", "WHERE"]
     OPERATORS = ["=", "!=", ">", "<", ">=", "<="]
@@ -24,8 +24,9 @@ class Parser:
                         except Exception as error:
                             response = 'Error: {}'.format(str(error))
                         print(response)
+                        
                         query = ''
-        
+        #create cats (id indexed, name, value);insert into cats (1, alex, meow);
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -94,7 +95,7 @@ class Parser:
                 for i in expression[into+1:]:
                     if i.upper() in self.SPECIAL_WORDS:
                         pass
-                    elif re.match(self.NAMES, i) and i.upper() not in self.SPECIAL_WORDS:
+                    elif re.match(self.NAMES, i):
                         values.append(i)
             except Exception:
                 table_name = expression[1]
