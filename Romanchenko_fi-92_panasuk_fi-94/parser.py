@@ -19,14 +19,13 @@ class Parser:
                             raise self.exit()
                         try:
                             response = self.action(command) # Try to parse and complete the commands
-                        except IndexError:
-                            response = self.error()
-                        # except Exception as error:
-                        #     response = 'Error: {}'.format(str(error))
+
+                        except Exception as error:
+                            response = 'Error: {}'.format(str(error))
                         print(response)
                         
                         query = ''
-        #create cats (id indexed, name, value);insert into cats (1, alex, meow);
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); select * from cast;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -53,8 +52,7 @@ class Parser:
     def exit(self) -> None:                         #qutting the application
         return quit()
 
-    def error(self) -> None:                        #displaying error message
-        return 'ERROR, COMMAND NOT FOUND'
+
 
     def parse_command(self, query) -> list:         #splits input for list of [command, column, values, *arg]
         regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*") #regex for removing termination symbols
@@ -74,8 +72,6 @@ class Parser:
                     indexation +=1
             if indexation in [0,1]:
                 return ['CREATE',table_name, columns]
-            else:
-                return self.error()
 
         elif re.match(r"(?i)select", query):
             selected = expression[1]
