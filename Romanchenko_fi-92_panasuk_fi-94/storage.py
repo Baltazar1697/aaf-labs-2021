@@ -26,34 +26,64 @@ class db:
             return f"{values} has been inserted!"
         else:
             return f"Incorrect input! Try again!"
-    def select_liner(self):
-        for key in self._table._scheme:
-                string = '+'+'-'*(2+len(key))
-                print(string, end='')
-    def select_valuer(self, value, index):
+
+    def select_valuer(self, value: str, index, keys: list):
         print('|', end='')
         if value == 'keys':
-            for key in self._table._scheme:
-                print(' ' + key + ' |', end='')
+            if len(keys) == 1 and keys[0] == '*':
+                for key in self._table._scheme:
+                    print(' ' + key + ' |', end='')
+            else:
+                for key in keys:
+                    print(' ' + key + ' |', end='')
         elif value =='data':
             print(' '+ str(list(self._table._data.keys())[index]) +' |', end='')
             for i in self._table._data:
                 for j in range(1,len(self._table._data[i].values())):
                     print(' ',str(list(self._table._data[i].values())[j])+ ' |', end='')
             print()
+    def select_liner(self, keys):
+        if len(keys) == 1 and keys[0] == '*':
+            for key in self._table._scheme:
+                string = '+'+'-'*(2+len(key))
+                print(string, end='')
+        else:
+            string = '+'+'-'*(2+len(str(list(self._table._scheme.keys())[0])))
+            print(string, end='')
+            for key in keys:
+                string = '+'+'-'*(2+len(key))
+                print(string, end='')
+#
+    def select_valuer_spec(self, value: list, index):
+        print('|', end='')
+        print(' '+ str(list(self._table._data.keys())[index]) + ' |', end='')
+        for i in self._table._data:
+            for j in value:
+                print(' ', str(self._table._data[i][j]) + ' |', end='')
+
     def select(self, table_name: str, columns: list, condition: list,) -> str: # Return columns selected
-        if columns == "*":
-            self.select_liner()
+        if len(columns) == 1 and columns[0] == "*":
+            self.select_liner('*')
             print('+')
             self.select_valuer('keys', 0)
             print()
-            self.select_liner()
+            self.select_liner('*')
             print()
             for i in range(self._table.dict_len()):
                 self.select_valuer('data', i)
-                self.select_liner()
+                self.select_liner('*')
             print()
-
+        else:
+            self.select_liner(columns)
+            print('+')
+            print('| '+ str(list(self._table._scheme.keys())[0])+ ' ', end='')
+            self.select_valuer('keys', 0, columns)
+            print()
+            self.select_liner(columns)
+            print()
+            for i in range(self._table.dict_len()):
+                self.select_valuer_spec(columns, i)
+            print()
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
     def delete(self, table_name: str, condition: list) -> str: # Delete data from table

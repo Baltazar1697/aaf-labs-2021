@@ -19,13 +19,15 @@ class Parser:
                             raise self.exit()
                         try:
                             response = self.action(command) # Try to parse and complete the commands
-
-                        except Exception as error:
-                            response = 'Error: {}'.format(str(error))
+                        except IndexError:
+                            response = self.error()
+                        # except Exception as error:
+                        #     response = 'Error: {}'.format(str(error))
                         print(response)
                         
                         query = ''
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select * from cast;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -74,11 +76,11 @@ class Parser:
                 return ['CREATE',table_name, columns]
 
         elif re.match(r"(?i)select", query):
-            selected = expression[1]
+
             expression = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
 
             table_name = expression[expression.index('FROM')+1]     
-
+            selected = expression[1:expression.index('FROM')]
             return ['SELECT', table_name, selected]
 
         elif re.match(r"(?i)insert", query):
