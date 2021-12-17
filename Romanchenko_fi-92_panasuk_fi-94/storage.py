@@ -3,9 +3,8 @@
 class db:
     @staticmethod
     def check_columns(self, columns: list) -> bool: # Check if columns are in table
-        for column in columns:
-            if column not in self._table._scheme.keys():
-                return False
+        if len(columns) != len(self._table._scheme.keys()):
+            return False
         return True
 
     def create(self, table_name: str, columns: list) -> str: # Create table
@@ -18,10 +17,13 @@ class db:
         return "invalid columns!"
 
     def insert(self, table_name: str, values: list) -> str: # Insert into table
+        indexator_value = values[self._table._indexator]
+        self._table._data[indexator_value] = {}
         if self.check_columns(self, values):
-            for i in values:
-               1
-        return f"{values} has been inserted!"
+            for i in range(self._table.__len__()):
+                self._table._data[indexator_value][list(self._table._scheme.keys())[i]] = values[i]
+
+            return f"{values} has been inserted!"
 
     def select(self, table_name: str, columns: list, condition: list,) -> str: # Return columns selected
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
@@ -35,12 +37,16 @@ if __name__ == "__main__":
 class table:
     def __init__(self, table_name, scheme):
         self._table_name = table_name
-        self._indexator = list(scheme.keys())[list(scheme.values()).index(True)]
+        self._indexator = list(scheme.values()).index(True)
         self._scheme = scheme
         self._data = {}
         print(self._indexator)
         print(self._scheme.keys())
 
-        def __getitem__(self, item):
-            return self._data[item]
+    def __getitem__(self, item):
+        return self._data[item]
 
+    def __setitem__(self, key, value):
+        self._data[key] = value
+    def __len__(self):
+        return len(self._scheme.keys())

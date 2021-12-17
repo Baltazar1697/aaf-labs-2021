@@ -21,8 +21,8 @@ class Parser:
                             response = self.action(command) # Try to parse and complete the commands
                         except IndexError:
                             response = self.error()
-                        except Exception as error:
-                            response = 'Error: {}'.format(str(error))
+                        # except Exception as error:
+                        #     response = 'Error: {}'.format(str(error))
                         print(response)
                         
                         query = ''
