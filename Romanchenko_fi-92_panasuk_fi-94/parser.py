@@ -29,6 +29,8 @@ class Parser:
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select * from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast; select * from cast;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (2, jack, woof); select name, value from cast where name = alex; 
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex, value = meow;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -39,14 +41,14 @@ class Parser:
             _, table_name, columns = query
             action_call = storage.create(table_name, columns)
         elif command == 'SELECT':
-            _, table_name, columns = query
-            action_call = storage.select(table_name, columns, condition = [])
+            _, table_name, columns, condition = query
+            action_call = storage.select(table_name, columns, condition)
         elif command == 'INSERT':
             _, table_name, values = query
             action_call = storage.insert(table_name, values)
         elif command == 'DELETE':
-            _, table_name = query
-            action_call = storage.delete(table_name, condition = [])
+            _, table_name, condition = query
+            action_call = storage.delete(table_name, condition )
         else:
             action_call = self.error()
 
@@ -77,12 +79,21 @@ class Parser:
                 return ['CREATE',table_name, columns]
 
         elif re.match(r"(?i)select", query):
+            condition = []
+            expression = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',re.sub(r"(?i)where", 'WHERE', query)))
+            from_pos = expression.index('FROM')
+            table_name = expression[from_pos+1]     
+            selected = expression[1:from_pos]
+            try:
+                where_pos = expression.index('WHERE')+1
+            except IndexError:
+                return ['SELECT', table_name, selected, condition]
 
-            expression = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
-
-            table_name = expression[expression.index('FROM')+1]     
-            selected = expression[1:expression.index('FROM')]
-            return ['SELECT', table_name, selected]
+            while where_pos < len(expression):
+                condition.append(expression[where_pos:where_pos+3])
+                where_pos+=3
+                
+            return ['SELECT', table_name, selected, condition]
 
         elif re.match(r"(?i)insert", query):
             values = []

@@ -42,22 +42,16 @@ class db:
             else: # if not all keys -> print only needed keys
                 for key in keys:
                     print(' ' + key + ' |', end='')
-        elif value =='data': # if runs with 'data' argument - 
-            print(' '+ str(list(self[table_name]._data.keys())[index]) +' |', end='')
+        elif value =='data': # if runs with 'data' argument -> print data from list
+            print(' '+ index +' |', end='')
             if len(keys) == 1 and keys[0] == '*':
-                for i in self[table_name]._data:
+                for i in self[table_name]:
                     for j in range(1,len(self[table_name]._data[i].values())):
                         print(' ',str(list(self[table_name]._data[i].values())[j])+ ' |', end='')
             else:
-                for i in self[table_name]._data:
-                    for j in keys:
-                        print(' ', str(self[table_name]._data[i][j]) + ' |', end='')
+               for j in keys:
+                    print(' ', str(self[table_name][index][j]) + ' |', end='')
             print()
-
-    def select_valuer_spec(self, value: list, index, table_name: str):
-        print('|', end='')
-        print(' '+ str(list(self[table_name]._data.keys())[index]) + ' |', end='')
-
 
     def select_liner(self, keys, table_name: str):
         if len(keys) == 1 and keys[0] == '*':
@@ -90,10 +84,12 @@ class db:
             self.select_valuer('keys', 0, columns, table_name)
             print()
             self.select_liner(columns, table_name)
-            print()
-            for i in range(self[table_name].dict_len()):
+            print('+')
+
+            for i in self[table_name]._data:
                 self.select_valuer('data', i, columns, table_name)
                 self.select_liner('*', table_name)
+                print()
             print()
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
