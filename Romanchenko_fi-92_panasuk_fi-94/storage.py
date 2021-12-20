@@ -89,7 +89,7 @@ class db:
             for i in self[table_name]._data:
                 self.select_valuer('data', i, columns, table_name)
                 self.select_liner('*', table_name)
-                print()
+                print('+')
             print()
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
