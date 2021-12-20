@@ -28,6 +28,7 @@ class Parser:
                         query = ''
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select * from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast; select * from cast;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
