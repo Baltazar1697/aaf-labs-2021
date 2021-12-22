@@ -28,11 +28,13 @@ class Parser:
                         query = ''
         
     def action(self, query:str) -> str:         #TODO: optimize this shit
-        if query.split()[0].upper() == 'EXIT':
-            action_call = self.exit()
-        query = self.parse_command(query)       #split input command to the list with needed arguments
-        command = query[0]
-        
+        try:
+            if query.split()[0].upper() == 'EXIT':
+                action_call = self.exit()
+            query = self.parse_command(query)       #split input command to the list with needed arguments
+            command = query[0]
+        except TypeError:
+            return f"Error in command, probably 2 indexed columns"
         if command == 'CREATE':
             _, table_name, columns = query
             action_call = storage.create(table_name, columns)
