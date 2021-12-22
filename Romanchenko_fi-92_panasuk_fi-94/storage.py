@@ -56,7 +56,7 @@ class db:
                 if not condition:
                     for i in self[table_name][index]:
                         print(' ', str(self[table_name][index][i]) + ' |', end='')
-                        rows+=1
+                    rows+=1
                 else:
                     for j in condition:
                         try:
@@ -217,7 +217,7 @@ class db:
                                 rows_to_delete.append(index)
         for i in list(set(rows_to_delete)):
             self[table_name]._data.pop(i)
-        return f"From {table_name} {len(rows_to_delete )} row(s) has been deleted from {table_name}!"
+        return f"From {table_name} {len(list(set(rows_to_delete)))} row(s) has been deleted from {table_name}!"
 
 if __name__ == "__main__":
     db = db()
