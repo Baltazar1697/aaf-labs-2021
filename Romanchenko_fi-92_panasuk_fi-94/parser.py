@@ -26,40 +26,43 @@ class Parser:
                         print(response)
                         
                         query = ''
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); select * from cast;
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast;
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast; select * from cast;
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (2, jack, woof); select name, value from cast where name = alex; 
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex or value = woof;
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast where name = alex; select * from cast;
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name from cast; delete from cast where name = alex or value = woof; select * from cast;
+        
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
         query = self.parse_command(query)       #split input command to the list with needed arguments
         command = query[0]
-
+        
         if command == 'CREATE':
             _, table_name, columns = query
             action_call = storage.create(table_name, columns)
         elif command == 'SELECT':
             _, table_name, columns, condition = query
-            action_call = storage.select(table_name, columns, condition)
+            if table_name not in storage._tables:
+                action_call = self.error()  
+            else:
+                action_call = storage.select(table_name, columns, condition)
         elif command == 'INSERT':
             _, table_name, values = query
-            action_call = storage.insert(table_name, values)
+            if table_name not in storage._tables:
+                action_call = self.error()
+            else:
+                action_call = storage.insert(table_name, values)
         elif command == 'DELETE':
             _, table_name, condition = query
-            action_call = storage.delete(table_name, condition )
+            if table_name not in storage._tables:
+                action_call = self.error()
+            else:
+                action_call = storage.delete(table_name, condition )
         else:
             action_call = self.error()
 
         return action_call
+    def error(self):
+        return f"Error in command"
 
     def exit(self) -> None:                         #qutting the application
         return quit()
-
-
 
     def parse_command(self, query) -> list:         #splits input for list of [command, column, values, *arg]
         regex = re.compile(r"\\n|\\t|\\r|/s|\W^\*") #regex for removing termination symbols
