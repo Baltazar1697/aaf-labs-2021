@@ -2,7 +2,7 @@ import storage as db, re
 storage = db.db()
 class Parser:
 
-    NAMES = r"[a-zA-Z]+|\d+" 
+    NAMES = r"[a-zA-Z]+|\d+|\"" 
     COMMANDS = ["CREATE", "INSERT", "SELECT", "DELETE"]
     SPECIAL_WORDS = ["INDEXED", "INTO", "FROM", "WHERE"]
 
@@ -123,6 +123,7 @@ class Parser:
                     if i.upper() in self.SPECIAL_WORDS:
                         pass
                     elif re.match(self.NAMES, i) and i.upper() not in self.SPECIAL_WORDS:
+                        i = re.sub(r"\"", '', i)
                         values.append(i)
             return ['INSERT', table_name, values]
 
@@ -132,9 +133,11 @@ class Parser:
             condition = []
             try:
                 table_name = expression[expression.index('FROM')+1]
-                where_pos = expression.index('WHERE')+1
             except ValueError:
                 table_name = expression[1]
+            try:
+                where_pos = expression.index('WHERE')+1
+            except ValueError:
                 return ['DELETE', table_name, condition]
 
             while where_pos < len(expression):
