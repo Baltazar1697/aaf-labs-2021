@@ -32,6 +32,7 @@ class Parser:
         #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (2, jack, woof); select name, value from cast where name = alex; 
         #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex or value = woof;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast where name = alex; select * from cast;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name from cast; delete from cast where name = alex or value = woof; select * from cast;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()

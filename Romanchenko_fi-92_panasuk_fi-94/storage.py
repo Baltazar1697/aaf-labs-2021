@@ -51,7 +51,6 @@ class db:
                 for key in keys:
                     print(' ' + key + ' |', end='')
         elif value =='data': # if runs with 'data' argument -> print data from list
-
             if len(keys) == 1 and keys[0] == '*':
                 print(' '+ index +' |', end='')
                 for i in self[table_name]:
@@ -138,8 +137,38 @@ class db:
         return f"{len(columns)} row(s) has been selected from {table_name} with {condition}!"
 
     def delete(self, table_name: str, condition: list) -> str: # Delete data from table
-        for i in self[table_name]._data:
-            self[table_name][i] = {}
+        rows_to_delete = []
+        if not condition:
+            for i in self[table_name]._data:
+                rows_to_delete.append(i)
+        else:
+            for j in condition:
+                try:
+                    bool_op = condition[condition.index(j)+1]
+                except IndexError:
+                    bool_op = False
+                    pass
+                if j == 'and' or j == 'or':
+                    pass
+                else:
+                    column, oper, col_val = j    
+                    oper = self.OPERATORS[oper]
+                    for index in self[table_name]._data:
+                        if bool_op == 'and':
+                            column2,oper2,col_val2 = condition[condition.index(j)+2]
+                            oper2 = self.OPERATORS[oper2]
+                            if oper(str(self[table_name][index][column]), col_val) and oper2(str(self[table_name][index][column2], col_val2)):
+                                rows_to_delete.append(index)
+                        elif bool_op == 'or':
+                            column2,oper2,col_val2 = condition[condition.index(j)+2]
+                            oper2 = self.OPERATORS[oper2]
+                            if oper(str(self[table_name][index][column]), col_val) or oper2(str(self[table_name][index][column2]), col_val2):
+                                rows_to_delete.append(index)
+                        elif not bool_op:
+                            if oper(str(self[table_name][index][column]), col_val):
+                                rows_to_delete.append(index)
+            for i in list(set(rows_to_delete)):
+                self[table_name]._data.pop(i)
         return f"From {table_name} row(s) has been deleted from {table_name}!"
 
 if __name__ == "__main__":
