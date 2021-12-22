@@ -1,6 +1,14 @@
 # DB structure
-
+import operator
 class db:
+    OPERATORS = {
+        "<": operator.lt,
+        "<=": operator.le,
+        "=": operator.eq,
+        "!=": operator.ne,
+        ">": operator.gt,
+        ">=": operator.ge
+    }
     def __init__(self):
         self._tables = {}
     def __getitem__(self, name):
@@ -33,7 +41,7 @@ class db:
         else:
             return f"Incorrect input! Try again!"
 
-    def select_valuer(self, value: str, index, keys: list, table_name: str): # runs for printing different values
+    def select_valuer(self, value: str, index, keys: list, table_name: str, condition): # runs for printing different values
         print('|', end='')
         if value == 'keys': # if runs with 'keys' argument =>
             if len(keys) == 1 and keys[0] == '*': # check if we need to print all the keys in table
@@ -43,14 +51,50 @@ class db:
                 for key in keys:
                     print(' ' + key + ' |', end='')
         elif value =='data': # if runs with 'data' argument -> print data from list
-            print(' '+ index +' |', end='')
+
             if len(keys) == 1 and keys[0] == '*':
+                print(' '+ index +' |', end='')
                 for i in self[table_name]:
                     for j in range(1,len(self[table_name]._data[i].values())):
                         print(' ',str(list(self[table_name]._data[i].values())[j])+ ' |', end='')
             else:
-               for j in keys:
-                    print(' ', str(self[table_name][index][j]) + ' |', end='')
+                if not condition:
+                    print(' '+ index +' |', end='')
+                    for j in keys:
+                        print(' ', str(self[table_name][index][j]) + ' |', end='')
+                else:
+                    for j in condition:
+                        try:
+                            bool_op = condition[condition.index(j)+1]
+                        except IndexError:
+                            bool_op = False
+                            pass
+                        if j == 'and' or j == 'or':
+                            pass
+                        else:
+                            column, oper, col_val = j    
+                            oper = self.OPERATORS[oper]
+                            
+                            if bool_op == 'and':
+                                column2,oper2,col_val2 = condition[condition.index(j)+2]
+                                oper2 = self.OPERATORS[oper2]
+                                if oper(str(self[table_name][index][column]), col_val) and oper2(str(self[table_name][index][column2], col_val2)):
+                                    print(' '+ index +' |', end='')
+                                    for j in keys:
+                                        print(' ', str(self[table_name][index][j]) + ' |', end='')
+                            elif bool_op == 'or':
+                                column2,oper2,col_val2 = condition[condition.index(j)+2]
+                                oper2 = self.OPERATORS[oper2]
+                                if oper(str(self[table_name][index][column]), col_val) or oper2(str(self[table_name][index][column2]), col_val2):
+                                    print(' '+ index +' |', end='')
+                                    for j in keys:
+                                        print(' ', str(self[table_name][index][j]) + ' |', end='')
+                            elif not bool_op:
+                                if oper(str(self[table_name][index][column]), col_val):
+                                    print(' '+ index +' |', end='')
+                                    for j in keys:
+                                        print(' ', str(self[table_name][index][j]) + ' |', end='')
+                        
             print()
 
     def select_liner(self, keys, table_name: str):
@@ -69,25 +113,25 @@ class db:
         if len(columns) == 1 and columns[0] == "*":
             self.select_liner('*', table_name)
             print('+')
-            self.select_valuer('keys', 0,'*' ,table_name)
+            self.select_valuer('keys', 0,'*' ,table_name, condition)
             print()
             self.select_liner('*', table_name)
             print()
             for i in range(self[table_name].dict_len()):
-                self.select_valuer('data', i, '*', table_name)
+                self.select_valuer('data', i, '*', table_name, condition)
                 self.select_liner('*', table_name)
             print()
         else:
             self.select_liner(columns, table_name)
             print('+')
             print('| '+ str(list(self[table_name]._scheme.keys())[0])+ ' ', end='')
-            self.select_valuer('keys', 0, columns, table_name)
+            self.select_valuer('keys', 0, columns, table_name, condition)
             print()
             self.select_liner(columns, table_name)
             print('+')
 
             for i in self[table_name]._data:
-                self.select_valuer('data', i, columns, table_name)
+                self.select_valuer('data', i, columns, table_name, condition)
                 self.select_liner('*', table_name)
                 print('+')
             print()
@@ -107,8 +151,7 @@ class table:
         self._indexator = list(scheme.values()).index(True)
         self._scheme = scheme
         self._data = {}
-        print(self._indexator)
-        print(self._scheme.keys())
+
 
     def __getitem__(self, item):
         return self._data[item]

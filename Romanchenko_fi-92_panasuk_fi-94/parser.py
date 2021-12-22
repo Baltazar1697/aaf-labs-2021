@@ -5,7 +5,7 @@ class Parser:
     NAMES = r"[a-zA-Z]+|\d+" 
     COMMANDS = ["CREATE", "INSERT", "SELECT", "DELETE"]
     SPECIAL_WORDS = ["INDEXED", "INTO", "FROM", "WHERE"]
-    OPERATORS = ["=", "!=", ">", "<", ">=", "<="]
+
 
     def __init__(self):       
         query = ''                              #initial action for start of the application
@@ -30,7 +30,7 @@ class Parser:
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast; select * from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (2, jack, woof); select name, value from cast where name = alex; 
-        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex, value = meow;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex or value = woof;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -90,6 +90,9 @@ class Parser:
                 return ['SELECT', table_name, selected, condition]
 
             while where_pos < len(expression):
+                if expression[where_pos].upper() == "OR" or expression[where_pos].upper() == "AND":
+                    condition.append(expression[where_pos])
+                    where_pos+=1
                 condition.append(expression[where_pos:where_pos+3])
                 where_pos+=3
                 
