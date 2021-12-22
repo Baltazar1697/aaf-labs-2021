@@ -31,6 +31,7 @@ class Parser:
         #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast; select * from cast;
         #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (2, jack, woof); select name, value from cast where name = alex; 
         #create cast (id indexed, name, value); insert cast (1, alex, meow); insert cast (3, jack, woof); select name, value from cast where name = alex or value = woof;
+        #create cast (id indexed, name, value); insert cast (1, alex, meow); select name from cast; delete from cast where name = alex; select * from cast;
     def action(self, query:str) -> str:         #TODO: optimize this shit
         if query.split()[0].upper() == 'EXIT':
             action_call = self.exit()
@@ -86,7 +87,7 @@ class Parser:
             selected = expression[1:from_pos]
             try:
                 where_pos = expression.index('WHERE')+1
-            except IndexError:
+            except ValueError:
                 return ['SELECT', table_name, selected, condition]
 
             while where_pos < len(expression):
@@ -121,12 +122,23 @@ class Parser:
 
 
         elif re.match(r"(?i)delete", query):
-            expression = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',query))
+            expression = re.findall(r'\S+',re.sub(r"(?i)from",'FROM',re.sub(r"(?i)where", 'WHERE', query)))
+            condition = []
             try:
                 table_name = expression[expression.index('FROM')+1]
+                where_pos = expression.index('WHERE')+1
             except ValueError:
                 table_name = expression[1]
-            return ['DELETE', table_name]
+                return ['DELETE', table_name, condition]
+
+            while where_pos < len(expression):
+                if expression[where_pos].upper() == "OR" or expression[where_pos].upper() == "AND":
+                    condition.append(expression[where_pos])
+                    where_pos+=1
+                condition.append(expression[where_pos:where_pos+3])
+                where_pos+=3
+                
+            return ['DELETE', table_name, condition]
 
 
 if __name__ == '__main__':
